@@ -75,4 +75,4 @@ class DictConstructorToLiteral(CodeMod):
 		return updated_node
 
 if __name__ == "__main__":
-	runner(DictConstructorToLiteral())
+	runner(DictConstructorToLiteral)
