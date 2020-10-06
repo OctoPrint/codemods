@@ -13,6 +13,8 @@ import libcst.matchers as m
 libcst based transformer to change dict(**args) to literal {...} constructs.
 
 Tool call heavily based on https://github.com/seatgeek/tornado-async-transformer
+
+Whitespace for alignment is not properly used in all cases yet, patches welcome.
 """
 
 __author__ = "Gina Häußge <gina@octoprint.org>"
