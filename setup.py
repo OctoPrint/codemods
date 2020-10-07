@@ -24,9 +24,9 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "codemod_dict_to_literal=octoprint_codemods.dict_to_literal",
-            "codemod_set_to_literal=octoprint_codemods.set_to_literal",
-            "codemod_not_in=octoprint_codemods.not_in",
+            "codemod_dict_to_literal=octoprint_codemods.dict_to_literal:main",
+            "codemod_set_to_literal=octoprint_codemods.set_to_literal:main",
+            "codemod_not_in=octoprint_codemods.not_in:main",
         ]
     },
 )
