@@ -22,8 +22,13 @@ def transform_file(
     write_after: bool,
     write_result: bool,
 ) -> None:
-    with open(filename, "r") as python_file:
-        python_source = python_file.read()
+    try:
+        with open(filename, "r") as python_file:
+            python_source = python_file.read()
+    except Exception as exc:
+        raise TransformError(
+            "Could not read file {}, skipping: {}".format(filename, str(exc))
+        )
 
     try:
         source_tree = cst.parse_module(python_source)
