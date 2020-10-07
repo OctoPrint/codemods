@@ -7,10 +7,6 @@ from .util import CodeMod, runner
 
 """
 libcst based transformer to change set(*args) to literal {...} constructs where possible.
-
-Tool call heavily based on https://github.com/seatgeek/tornado-async-transformer
-
-Whitespace for alignment is not properly used in all cases yet, patches welcome.
 """
 
 __author__ = "Gina Häußge <gina@octoprint.org>"

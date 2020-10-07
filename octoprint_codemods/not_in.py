@@ -6,10 +6,6 @@ from .util import CodeMod, runner
 
 """
 libcst based transformer to change 'not foo in bar' to 'foo not in bar' constructs.
-
-Tool call heavily based on https://github.com/seatgeek/tornado-async-transformer
-
-Whitespace for alignment is not properly used in all cases yet, patches welcome.
 """
 
 __author__ = "Gina Häußge <gina@octoprint.org>"
@@ -40,7 +36,7 @@ class NotIn(CodeMod):
             )
             self.count += 1
             return new_node
-        return node
+        return updated_node
 
 
 def main():
