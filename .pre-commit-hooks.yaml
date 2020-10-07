@@ -1,0 +1,24 @@
+- id: codemod_dict_to_literal
+  name: dict_to_literal
+  description: "Converts dict(**args) to literal {...} constructs."
+  entry: codemod_dict_to_literal
+  language: python
+  language_version: python3.7
+  require_serial: true
+  types: [python]
+- id: codemod_set_to_literal
+  name: set_to_literal
+  description: "Converts set(*args) to literal {...} constructs."
+  entry: codemod_set_to_literal
+  language: python
+  language_version: python3.7
+  require_serial: true
+  types: [python]
+- id: codemod_not_in
+  name: not_in
+  description: "Converts 'not foo in bar' to 'foo not in bar' constructs."
+  entry: codemod_not_in
+  language: python
+  language_version: python3.7
+  require_serial: true
+  types: [python]
