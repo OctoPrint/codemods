@@ -1,13 +1,18 @@
 import argparse
 import os
 import re
-from typing import List, Tuple, Type
+from typing import Callable, List, Tuple, Type
 
 import libcst as cst
 
 
 class CodeMod(cst.CSTTransformer):
-    def __init__(self):
+    @classmethod
+    def add_parser_args(cls, parser):
+        pass
+
+    def __init__(self, args):
+        self.args = args
         self.count = 0
 
 
@@ -84,7 +89,7 @@ def collect_files(base: str, ignored: List[str]) -> Tuple[str, ...]:
     return tuple()
 
 
-def parse_args(description) -> argparse.Namespace:
+def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "bases",
@@ -114,11 +119,12 @@ def parse_args(description) -> argparse.Namespace:
         action="append",
         help="Paths to ignore, add multiple as required",
     )
+    add_parser_args(parser)
     return parser.parse_args()
 
 
 def runner(cls: Type[CodeMod]) -> None:
-    args = parse_args(cls.DESCRIPTION)
+    args = parse_args(cls.DESCRIPTION, cls.add_parser_args)
 
     python_files: List[str] = []
     for base in args.bases:
@@ -126,7 +132,7 @@ def runner(cls: Type[CodeMod]) -> None:
 
     for python_file in python_files:
         print("Processing {}... ".format(python_file.replace("\\", "/")), end="")
-        transformer = cls()
+        transformer = cls(args)
         transform_file(
             transformer,
             python_file,
