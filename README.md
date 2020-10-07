@@ -6,13 +6,26 @@ Provided as-is for documentationational purposes.
 
 ## Setup
 
-    pip3 install -r requirements.txt
+    pip3 install .
 
 ## Usage
 
 See
 
-    python3 <codemod.py> --help
+    codemod_{dict_to_literal|set_to_literal|not_in} --help
+
+## pre-commit
+
+This repository can be used with [pre-commit](https://pre-commit.com/).
+
+``` yaml
+  - repo: https://github.com/OctoPrint/codemods
+    rev: main
+    hooks:
+      - id: codemod_dict_to_literal
+      - id: codemod_set_to_literal
+      - id: codemod_not_in
+```
 
 ## License
 
