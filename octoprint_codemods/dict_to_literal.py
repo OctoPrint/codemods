@@ -16,8 +16,8 @@ __license__ = "MIT"
 class DictConstructorToLiteral(CodeMod):
     DESCRIPTION: str = "Converts dict(**args) to literal {...} constructs."
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, args) -> None:
+        super().__init__(args)
         self.arg_stack = []
 
     def visit_Arg(self, node: cst.Arg) -> bool:
