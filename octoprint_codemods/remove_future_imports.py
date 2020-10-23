@@ -14,7 +14,7 @@ __license__ = "MIT"
 
 
 class CheckFutureImports(CodeMod):
-    DESCRIPTION: str = "Removes 'from __future__ imports ...'"
+    DESCRIPTION: str = "Removes 'from __future__ import ...'"
 
     @classmethod
     def add_parser_args(cls, parser):

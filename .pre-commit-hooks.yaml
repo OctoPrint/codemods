@@ -22,10 +22,10 @@
   language_version: python3.7
   require_serial: true
   types: [python]
-- id: codemod_check_future_imports
-  name: check_future_imports
-  description: "Removes 'from __future__ imports ...'"
-  entry: codemod_check_future_imports
+- id: codemod_remove_future_imports
+  name: remove_future_imports
+  description: "Removes 'from __future__ imports ...' imports"
+  entry: codemod_remove_future_imports
   language: python
   language_version: python3.7
   require_serial: true
