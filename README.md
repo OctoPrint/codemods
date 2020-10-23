@@ -12,7 +12,7 @@ Provided as-is for documentationational purposes.
 
 See
 
-    codemod_{dict_to_literal|set_to_literal|not_in} --help
+    codemod_* --help
 
 ## pre-commit
 
