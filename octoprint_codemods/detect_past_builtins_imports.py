@@ -28,6 +28,7 @@ class CheckPastBuiltinsImports(CodeCheck):
                 ]
             ),
         ):
+            self._report_node(node)
             self.count += 1
 
     def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
@@ -35,11 +36,12 @@ class CheckPastBuiltinsImports(CodeCheck):
             node.module,
             m.OneOf(m.Name("past"), m.Attribute(value=m.Name("past"))),
         ):
+            self._report_node(node)
             self.count += 1
 
 
 def main():
-    runner(CheckPastBuiltinsImports, output="{file}: {count} occurrences detected")
+    runner(CheckPastBuiltinsImports, output=None)
 
 
 if __name__ == "__main__":

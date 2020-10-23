@@ -5,12 +5,18 @@ import sys
 from typing import Callable, ClassVar, List, Tuple, Type, Union, cast
 
 import libcst as cst
+from libcst import MetadataDependent
+from libcst.metadata import PositionProvider
 
 
-class CodeInspector:
+class CodeInspector(MetadataDependent):
+    METADATA_DEPENDENCIES = (PositionProvider,)
     DESCRIPTION: ClassVar[str]
+
+    args: argparse.Namespace
     count: int
     filename: str
+    module: cst.Module
 
     @classmethod
     def add_parser_args(cls, parser):
@@ -21,9 +27,30 @@ class CodeInspector:
         self.args = args
         self.reset()
 
-    def reset(self, filename=None):
+    def reset(
+        self,
+        filename: Union[str, None] = None,
+        module: Union[cst.Module, None] = None,
+    ) -> None:
         self.count = 0
-        self.filename = filename
+        self.filename = filename.replace("\\", "/") if filename else filename
+        self.module = module
+
+    def _report_node(
+        self,
+        node: cst.CSTNode,
+        output: str = "{filename}:{pos.line}:{pos.column}: {code}",
+    ) -> None:
+        if self.get_metadata(PositionProvider, node):
+            pos = self.get_metadata(PositionProvider, node).start
+            print(
+                output.format(
+                    node=node,
+                    pos=pos,
+                    code=self.module.code_for_node(node) if self.module else "",
+                    filename=self.filename if self.filename else "",
+                )
+            )
 
 
 class CodeMod(CodeInspector, cst.CSTTransformer):
@@ -52,7 +79,8 @@ def process_file(
         print("Could not read file {}, skipping: {}".format(filename, str(exc)))
 
     try:
-        source_tree = cst.parse_module(python_source)
+        module = cst.parse_module(python_source)
+        source_tree = cst.MetadataWrapper(module)
     except Exception as e:
         print("{} failed parse: {}".format(filename, str(e)))
         return
@@ -61,7 +89,7 @@ def process_file(
         with open(filename + ".cst.before", "w") as cst_file:
             cst_file.write(str(source_tree))
 
-    visitor.reset(filename=filename)
+    visitor.reset(filename=filename, module=module)
     try:
         visited_tree = source_tree.visit(visitor)
     except TransformError as e:
