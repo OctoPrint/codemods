@@ -19,7 +19,6 @@ class CheckBuiltinsImports(CodeMod):
     def leave_Import(
         self, node: cst.Import, updated_node: cst.Import
     ) -> Union[cst.Import, cst.RemovalSentinel]:
-        print(repr(updated_node))
         if m.matches(
             updated_node,
             m.Import(
