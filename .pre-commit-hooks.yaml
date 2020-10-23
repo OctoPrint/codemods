@@ -4,7 +4,7 @@
   entry: codemod_dict_to_literal
   language: python
   language_version: python3.7
-  require_serial: true
+  require_serial: false
   types: [python]
 - id: codemod_set_to_literal
   name: set_to_literal
@@ -12,7 +12,7 @@
   entry: codemod_set_to_literal
   language: python
   language_version: python3.7
-  require_serial: true
+  require_serial: false
   types: [python]
 - id: codemod_not_in
   name: not_in
@@ -20,7 +20,7 @@
   entry: codemod_not_in
   language: python
   language_version: python3.7
-  require_serial: true
+  require_serial: false
   types: [python]
 - id: codemod_remove_future_imports
   name: remove_future_imports
@@ -28,5 +28,21 @@
   entry: codemod_remove_future_imports
   language: python
   language_version: python3.7
-  require_serial: true
+  require_serial: false
+  types: [python]
+- id: codemod_remove_builtins_imports
+  name: remove_builtins_imports
+  description: "Removes 'from builtins import ...' imports"
+  entry: codemod_remove_builtins_imports
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
+- id: codemod_detect_past_builtins_imports
+  name: detect_past_builtins_imports
+  description: "Detects 'from past import ...', 'from past.builtins import ...', 'import past', 'import past.builtins' imports"
+  entry: codemod_detect_past_builtins_imports
+  language: python
+  language_version: python3.7
+  require_serial: false
   types: [python]

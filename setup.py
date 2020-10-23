@@ -28,6 +28,8 @@ setup(
             "codemod_set_to_literal=octoprint_codemods.set_to_literal:main",
             "codemod_not_in=octoprint_codemods.not_in:main",
             "codemod_remove_future_imports=octoprint_codemods.remove_future_imports:main",
+            "codemod_remove_builtins_imports=octoprint_codemods.remove_builtins_imports:main",
+            "codemod_detect_past_builtins_imports=octoprint_codemods.detect_past_builtins_imports:main",
         ]
     },
 )
