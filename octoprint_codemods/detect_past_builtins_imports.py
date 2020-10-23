@@ -39,7 +39,7 @@ class CheckPastBuiltinsImports(CodeCheck):
 
 
 def main():
-    runner(CheckPastBuiltinsImports, output="{} occurrences detected")
+    runner(CheckPastBuiltinsImports, output="{file}: {count} occurrences detected")
 
 
 if __name__ == "__main__":

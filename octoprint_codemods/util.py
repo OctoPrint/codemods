@@ -9,7 +9,8 @@ import libcst as cst
 
 class CodeInspector:
     DESCRIPTION: ClassVar[str]
-    count: int = 0
+    count: int
+    filename: str
 
     @classmethod
     def add_parser_args(cls, parser):
@@ -18,7 +19,11 @@ class CodeInspector:
     def __init__(self, args):
         super().__init__()
         self.args = args
+        self.reset()
+
+    def reset(self, filename=None):
         self.count = 0
+        self.filename = filename
 
 
 class CodeMod(CodeInspector, cst.CSTTransformer):
@@ -56,20 +61,22 @@ def process_file(
         with open(filename + ".cst.before", "w") as cst_file:
             cst_file.write(str(source_tree))
 
+    visitor.reset(filename=filename)
     try:
         visited_tree = source_tree.visit(visitor)
     except TransformError as e:
         print("{} failed transform: {}".format(filename, str(e)))
         return
 
-    if visitor.count:
-        if write_result:
-            with open(filename, "w") as python_file:
-                python_file.write(visited_tree.code)
+    if isinstance(visitor, CodeMod):
+        if visitor.count:
+            if write_result:
+                with open(filename, "w") as python_file:
+                    python_file.write(visited_tree.code)
 
-    if write_after:
-        with open(filename + ".cst.after", "w") as cst_file:
-            cst_file.write(str(visited_tree))
+        if write_after:
+            with open(filename + ".cst.after", "w") as cst_file:
+                cst_file.write(str(visited_tree))
 
 
 def collect_files(base: str, ignored: List[str]) -> Tuple[str, ...]:
@@ -136,8 +143,21 @@ def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespac
     return parser.parse_args()
 
 
-def runner(cls: Type[CodeInspector], output: str = "{} replacements done") -> None:
+def runner(
+    cls: Type[CodeInspector],
+    output: Union[str, None] = "{file}: {count} replacements done",
+) -> None:
     args = parse_args(cls.DESCRIPTION, cls.add_parser_args)
+
+    inspector = cls(args)
+
+    if isinstance(inspector, CodeMod):
+        inspector = cast(CodeMod, inspector)
+    elif isinstance(inspector, CodeCheck):
+        inspector = cast(CodeCheck, inspector)
+    else:
+        print("Unknown inspector type: {}".format(inspector))
+        sys.exit(-1)
 
     python_files: List[str] = []
     for base in args.bases:
@@ -145,17 +165,6 @@ def runner(cls: Type[CodeInspector], output: str = "{} replacements done") -> No
 
     count = 0
     for python_file in python_files:
-        print("Processing {}... ".format(python_file.replace("\\", "/")), end="")
-        inspector = cls(args)
-
-        if isinstance(inspector, CodeMod):
-            inspector = cast(CodeMod, inspector)
-        elif isinstance(inspector, CodeCheck):
-            inspector = cast(CodeCheck, inspector)
-        else:
-            print("Unknown inspector type: {}".format(inspector))
-            sys.exit(-1)
-
         process_file(
             inspector,
             python_file,
@@ -163,7 +172,10 @@ def runner(cls: Type[CodeInspector], output: str = "{} replacements done") -> No
             write_after=args.after,
             write_result=not args.dryrun,
         )
-        print(output.format(inspector.count))
+        if output:
+            print(
+                output.format(file=python_file.replace("\\", "/"), count=inspector.count)
+            )
         count += inspector.count
 
     sys.exit(count)
