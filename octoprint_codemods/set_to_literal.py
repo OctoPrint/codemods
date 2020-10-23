@@ -22,7 +22,7 @@ class SetConstructorToLiteral(CodeMod):
         if m.matches(
             updated_node, m.Call(func=m.Name("set"), args=[m.Arg(value=m.GeneratorExp())])
         ):
-            # generator
+            # set(a for a in collection) => {a for a in collection}
             generator = cast(cst.GeneratorExp, updated_node.args[0].value)
 
             new_node = cst.SetComp(elt=generator.elt, for_in=generator.for_in)
@@ -30,10 +30,16 @@ class SetConstructorToLiteral(CodeMod):
             self.count += 1
             return new_node
 
-        elif m.matches(updated_node, m.Call(func=m.Name("set"), args=[m.AtLeastN(n=2)])):
-            # simple set
-            elements = [cst.Element(value=arg.value) for arg in updated_node.args]
-            new_node = cst.Set(elements)
+        elif m.matches(
+            updated_node,
+            m.Call(
+                func=m.Name("set"),
+                args=[m.Arg(value=m.List(elements=[m.AtLeastN(n=1)]))],
+            ),
+        ):
+            # set([1, 2, 3, ...]) => {1, 2, 3, ...}
+            seq = cast(cst.List, updated_node.args[0].value)
+            new_node = cst.Set(elements=seq.elements)
 
             self.count += 1
             return new_node
