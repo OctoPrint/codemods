@@ -1,6 +1,7 @@
-from typing import Union
+from typing import Union, cast
 
 import libcst as cst
+import libcst.matchers as m
 
 from .util import CodeMod, runner
 
@@ -18,19 +19,22 @@ class NotIn(CodeMod):
     def leave_UnaryOperation(
         self, node: cst.UnaryOperation, updated_node: cst.UnaryOperation
     ) -> Union[cst.UnaryOperation, cst.Comparison]:
-        if (
-            isinstance(updated_node.operator, cst.Not)
-            and isinstance(updated_node.expression, cst.Comparison)
-            and len(updated_node.expression.comparisons) == 1
-            and isinstance(updated_node.expression.comparisons[0], cst.ComparisonTarget)
-            and isinstance(updated_node.expression.comparisons[0].operator, cst.In)
+        if m.matches(
+            updated_node,
+            m.UnaryOperation(
+                operator=m.Not(),
+                expression=m.Comparison(
+                    comparisons=[m.ComparisonTarget(operator=m.In())]
+                ),
+            ),
         ):
+            expression = cast(cst.Comparison, updated_node.expression)
             new_node = cst.Comparison(
-                left=updated_node.expression.left,
+                left=expression.left,
                 comparisons=[
                     cst.ComparisonTarget(
                         operator=cst.NotIn(),
-                        comparator=updated_node.expression.comparisons[0].comparator,
+                        comparator=expression.comparisons[0].comparator,
                     )
                 ],
             )

@@ -1,27 +1,40 @@
 import argparse
 import os
 import re
-from typing import Callable, List, Tuple, Type
+import sys
+from typing import Callable, ClassVar, List, Tuple, Type, Union, cast
 
 import libcst as cst
 
 
-class CodeMod(cst.CSTTransformer):
+class CodeInspector:
+    DESCRIPTION: ClassVar[str]
+    count: int = 0
+
     @classmethod
     def add_parser_args(cls, parser):
         pass
 
     def __init__(self, args):
+        super().__init__()
         self.args = args
         self.count = 0
+
+
+class CodeMod(CodeInspector, cst.CSTTransformer):
+    pass
+
+
+class CodeCheck(CodeInspector, cst.CSTVisitor):
+    pass
 
 
 class TransformError(Exception):
     """Error raise while encountering a known error while attempting to transform the tree"""
 
 
-def transform_file(
-    visitor: CodeMod,
+def process_file(
+    visitor: Union[CodeMod, CodeCheck],
     filename: str,
     write_before: bool,
     write_after: bool,
@@ -49,7 +62,7 @@ def transform_file(
         print("{} failed transform: {}".format(filename, str(e)))
         return
 
-    if not visited_tree.deep_equals(source_tree):
+    if visitor.count:
         if write_result:
             with open(filename, "w") as python_file:
                 python_file.write(visited_tree.code)
@@ -123,21 +136,34 @@ def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespac
     return parser.parse_args()
 
 
-def runner(cls: Type[CodeMod]) -> None:
+def runner(cls: Type[CodeInspector], output: str = "{} replacements done") -> None:
     args = parse_args(cls.DESCRIPTION, cls.add_parser_args)
 
     python_files: List[str] = []
     for base in args.bases:
         python_files += collect_files(base, ignored=args.ignore)
 
+    count = 0
     for python_file in python_files:
         print("Processing {}... ".format(python_file.replace("\\", "/")), end="")
-        transformer = cls(args)
-        transform_file(
-            transformer,
+        inspector = cls(args)
+
+        if isinstance(inspector, CodeMod):
+            inspector = cast(CodeMod, inspector)
+        elif isinstance(inspector, CodeCheck):
+            inspector = cast(CodeCheck, inspector)
+        else:
+            print("Unknown inspector type: {}".format(inspector))
+            sys.exit(-1)
+
+        process_file(
+            inspector,
             python_file,
             write_before=args.before,
             write_after=args.after,
             write_result=not args.dryrun,
         )
-        print("{} replacements done".format(transformer.count))
+        print(output.format(inspector.count))
+        count += inspector.count
+
+    sys.exit(count)
