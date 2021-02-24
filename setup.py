@@ -30,6 +30,7 @@ setup(
             "codemod_remove_future_imports=octoprint_codemods.remove_future_imports:main",
             "codemod_remove_builtins_imports=octoprint_codemods.remove_builtins_imports:main",
             "codemod_detect_past_builtins_imports=octoprint_codemods.detect_past_builtins_imports:main",
+            "codemod_py3_class_inheritance=octoprint_codemods.py3_class_inheritance:main",
         ]
     },
 )

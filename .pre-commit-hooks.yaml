@@ -46,3 +46,11 @@
   language_version: python3.7
   require_serial: false
   types: [python]
+- id: codemod_py3_class_inheritance
+  name: py3_class_inheritance
+  description: "Changes 'class Foo(object):' to 'class Foo:'."
+  entry: codemod_py3_class_inheritance
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
