@@ -32,6 +32,7 @@ setup(
             "codemod_detect_past_builtins_imports=octoprint_codemods.detect_past_builtins_imports:main",
             "codemod_py3_class_inheritance=octoprint_codemods.py3_class_inheritance:main",
             "codemod_oserror_merge=octoprint_codemods.oserror_merge:main",
+            "codemod_yield_from_generator=octoprint_codemods.yield_from_generator:main",
         ]
     },
 )

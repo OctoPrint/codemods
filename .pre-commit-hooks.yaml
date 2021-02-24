@@ -62,3 +62,11 @@
   language_version: python3.7
   require_serial: false
   types: [python]
+- id: codemod_yield_from_generator
+  name: yield_from_generator
+  description: "Converts 'for x in generator: yield x' to 'yield from generator'."
+  entry: codemod_yield_from_generator
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
