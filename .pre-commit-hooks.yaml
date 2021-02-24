@@ -54,3 +54,11 @@
   language_version: python3.7
   require_serial: false
   types: [python]
+- id: codemod_oserror_merge
+  name: oserror_merge
+  description: "Converts 'EnvironmentError' and friends to 'OSError'."
+  entry: codemod_oserror_merge
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
