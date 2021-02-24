@@ -29,7 +29,7 @@ except OSError:
 
 try:
     foo()
-except OSError:
+except OSError as exc:
     pass
 
 try:
@@ -50,4 +50,14 @@ except OSError:
 try:
     foo()
 except (ValueError, OSError):
+    pass
+
+try:
+    foo()
+except RuntimeError:
+    pass
+
+try:
+    foo()
+except (RuntimeError, ValueError) as error:
     pass

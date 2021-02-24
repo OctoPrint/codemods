@@ -29,7 +29,7 @@ except select.error:
 
 try:
     foo()
-except mmap.error:
+except mmap.error as exc:
     pass
 
 try:
@@ -50,4 +50,14 @@ except (EnvironmentError, mmap.error):
 try:
     foo()
 except (EnvironmentError, ValueError, mmap.error):
+    pass
+
+try:
+    foo()
+except RuntimeError:
+    pass
+
+try:
+    foo()
+except (RuntimeError, ValueError) as error:
     pass
