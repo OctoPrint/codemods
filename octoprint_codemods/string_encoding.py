@@ -39,7 +39,8 @@ class StringEncoding(CodeMod):
                 ).evaluated_value
 
             if encoding == self.DEFAULT_ENCODING:
-                if string.prefix and "r" in string.prefix:
+                if all(ord(c) < 128 for c in string.evaluated_value):
+                    # ASCII only string, prefix b and be done
                     new_string = (
                         string.prefix
                         + "b"
@@ -53,6 +54,7 @@ class StringEncoding(CodeMod):
                     self.count += 1
 
                 elif updated_node.args:
+                    # utf-8 defined, that's redundant
                     self._report_node(original_node)
                     updated_node = updated_node.with_changes(args=[])
                     self.count += 1
