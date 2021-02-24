@@ -174,6 +174,11 @@ def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespac
         action="append",
         help="Paths to ignore, add multiple as required",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Generate output for all processed files, not juse for those with replacements",
+    )
     add_parser_args(parser)
     return parser.parse_args()
 
@@ -207,7 +212,7 @@ def runner(
             write_after=args.after,
             write_result=not args.dryrun,
         )
-        if output:
+        if output and (args.verbose or inspector.count):
             print(
                 output.format(file=python_file.replace("\\", "/"), count=inspector.count)
             )
