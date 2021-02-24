@@ -80,8 +80,7 @@
   types: [python]
 - id: codemod_string_encoding
   name: string_encoding
-  description: >
-    Converts 'r"abc".encode("utf8")' to 'rb"abc"' and '"abc".encode("utf8")' to '"abc".encode()'
+  description: "Converts r'abc'.encode('utf8') to rb'abc' and 'abc'.encode('utf8') to 'abc'.encode()"
   entry: codemod_string_encoding
   language: python
   language_version: python3.7
