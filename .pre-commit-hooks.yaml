@@ -70,3 +70,11 @@
   language_version: python3.7
   require_serial: false
   types: [python]
+- id: codemod_dict_comprehension_to_literal
+  name: dict_comprehension_to_literal
+  description: "Converts 'dict((x.a, x.b) for x in y)' to '{x.a: x.b for x in y}'"
+  entry: codemod_dict_comprehension_to_literal
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
