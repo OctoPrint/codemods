@@ -39,7 +39,7 @@ class CodeInspector(MetadataDependent):
     def _report_node(
         self,
         node: cst.CSTNode,
-        output: str = "{filename}:{pos.line}:{pos.column}: {code}",
+        output: str = "{filename}:{pos.line}:{pos.column}:\n{code}",
     ) -> None:
         if self.get_metadata(PositionProvider, node):
             pos = self.get_metadata(PositionProvider, node).start
@@ -47,7 +47,14 @@ class CodeInspector(MetadataDependent):
                 output.format(
                     node=node,
                     pos=pos,
-                    code=self.module.code_for_node(node) if self.module else "",
+                    code="\n".join(
+                        map(
+                            lambda x: "  " + x,
+                            (
+                                self.module.code_for_node(node) if self.module else ""
+                            ).split("\n"),
+                        )
+                    ),
                     filename=self.filename if self.filename else "",
                 )
             )

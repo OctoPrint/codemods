@@ -37,6 +37,7 @@ class CheckFutureImports(CodeMod):
                     updated_node.names,
                 )
             )
+            self._report_node(node)
             self.count += 1
             if names:
                 return updated_node.with_changes(names=names)

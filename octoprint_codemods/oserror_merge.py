@@ -52,11 +52,13 @@ class OsErrorMerge(CodeMod):
                 ]
             ),
         ):
+            self._report_node(original_node)
             self.count += 1
             updated_node = updated_node.with_changes(
                 type=self.replace_tuple(updated_node.type)
             )
         elif m.matches(updated_node.type, self.TO_REPLACE):
+            self._report_node(original_node)
             self.count += 1
             updated_node = updated_node.with_changes(type=self.REPLACEMENT.deep_clone())
         return updated_node

@@ -24,6 +24,7 @@ class Py3ClassInheritance(CodeMod):
             )
         )
         if len(filtered_bases) != len(updated_node.bases):
+            self._report_node(node)
             self.count += 1
 
             lpar = updated_node.lpar

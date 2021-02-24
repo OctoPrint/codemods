@@ -39,6 +39,7 @@ class DictComprehensionToLiteral(CodeMod):
             key = t.elements[0].value
             value = t.elements[1].value
 
+            self._report_node(original_node)
             self.count += 1
             return cst.DictComp(key=key, value=value, for_in=exp.for_in)
 

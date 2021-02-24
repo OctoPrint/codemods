@@ -23,6 +23,7 @@ class YieldFromGenerator(CodeMod):
             updated_node.body,
             m.IndentedBlock(body=[m.SimpleStatementLine(body=[m.Expr(value=m.Yield())])]),
         ):
+            self._report_node(original_node)
             self.count += 1
             updated_node = cst.SimpleStatementLine(
                 body=[cst.Expr(value=cst.Yield(value=cst.From(item=updated_node.iter)))]

@@ -38,6 +38,8 @@ class NotIn(CodeMod):
                     )
                 ],
             )
+
+            self._report_node(node)
             self.count += 1
             return new_node
         return updated_node

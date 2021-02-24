@@ -33,6 +33,7 @@ class DictConstructorToLiteral(CodeMod):
             ]
             new_node = cst.Dict(elements)
 
+            self._report_node(node)
             self.count += 1
             return new_node
         return updated_node

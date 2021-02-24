@@ -29,6 +29,7 @@ class CheckBuiltinsImports(CodeMod):
                 ]
             ),
         ):
+            self._report_node(node)
             self.count += 1
             return cst.RemovalSentinel.REMOVE
         return updated_node

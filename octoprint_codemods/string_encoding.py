@@ -47,9 +47,13 @@ class StringEncoding(CodeMod):
                         + string.raw_value
                         + string.quote
                     )
+
+                    self._report_node(original_node)
                     updated_node = string.with_changes(value=new_string)
                     self.count += 1
+
                 elif updated_node.args:
+                    self._report_node(original_node)
                     updated_node = updated_node.with_changes(args=[])
                     self.count += 1
 

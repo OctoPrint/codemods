@@ -20,7 +20,8 @@ class SetConstructorToLiteral(CodeMod):
         self, node: cst.Call, updated_node: cst.Call
     ) -> Union[cst.Call, cst.Set, cst.SetComp]:
         if m.matches(
-            updated_node, m.Call(func=m.Name("set"), args=[m.Arg(value=m.GeneratorExp())])
+            updated_node,
+            m.Call(func=m.Name("set"), args=[m.Arg(value=m.GeneratorExp())]),
         ):
             # set(a for a in collection) => {a for a in collection}
             generator = cast(cst.GeneratorExp, updated_node.args[0].value)
@@ -41,6 +42,7 @@ class SetConstructorToLiteral(CodeMod):
             seq = cast(cst.List, updated_node.args[0].value)
             new_node = cst.Set(elements=seq.elements)
 
+            self._report_node(node)
             self.count += 1
             return new_node
 
