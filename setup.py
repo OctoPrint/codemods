@@ -7,7 +7,7 @@ with io.open("README.md", "r", encoding="utf-8") as readme:
 
 setup(
     name="octoprint_codemods",
-    version="0.2.1",
+    version="0.3.0",
     description="libcst based tooling for running various conversions on OctoPrint's source",
     url="https://github.com/OctoPrint/codemods",
     packages=find_packages(exclude=["tests"]),
