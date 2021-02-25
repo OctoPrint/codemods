@@ -21,7 +21,7 @@ codemods = [
 
 
 def _get_files(codemod):
-    input_file = os.path.join(os.path.dirname(__file__), "fixtures", codemod + ".py")
+    input_file = os.path.join(os.path.dirname(__file__), "input", codemod + ".py")
     expected_file = os.path.join(os.path.dirname(__file__), "expected", codemod + ".py")
     return input_file, expected_file
 
