@@ -35,6 +35,7 @@ setup(
             "codemod_yield_from_generator=octoprint_codemods.yield_from_generator:main",
             "codemod_dict_comprehension_to_literal=octoprint_codemods.dict_comprehension_to_literal:main",
             "codemod_string_encoding=octoprint_codemods.string_encoding:main",
+            "codemod_py3_super=octoprint_codemods.py3_super:main",
         ]
     },
 )

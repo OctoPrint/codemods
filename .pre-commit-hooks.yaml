@@ -86,3 +86,11 @@
   language_version: python3.7
   require_serial: false
   types: [python]
+- id: codemod_py3_super
+  name: py3_super
+  description: "Converts  'super(cls, self).member' to 'super().member'."
+  entry: codemod_py3_super
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
