@@ -1,4 +1,5 @@
 import argparse
+import difflib
 import os
 import re
 import sys
@@ -75,9 +76,9 @@ class TransformError(Exception):
 def process_file(
     visitor: Union[CodeMod, CodeCheck],
     filename: str,
-    write_before: bool,
-    write_after: bool,
-    write_result: bool,
+    write_before: bool = False,
+    write_after: bool = False,
+    write_result: bool = True,
 ) -> None:
     try:
         with open(filename, "r") as python_file:
@@ -112,6 +113,8 @@ def process_file(
         if write_after:
             with open(filename + ".cst.after", "w") as cst_file:
                 cst_file.write(str(visited_tree))
+
+    return visited_tree.code
 
 
 def collect_files(base: str, ignored: List[str]) -> Tuple[str, ...]:
@@ -179,8 +182,38 @@ def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespac
         action="store_true",
         help="Generate output for all processed files, not juse for those with replacements",
     )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Run in test mode: first path is input file, second path is file with expected output.",
+    )
     add_parser_args(parser)
     return parser.parse_args()
+
+
+def test_runner(
+    mod: CodeMod, input_path: str, expected_path: str, diff: bool = True
+) -> bool:
+    with open(expected_path, "r") as python_file:
+        expected = python_file.read()
+    actual = process_file(mod, input_path, write_result=False)
+
+    if actual != expected:
+        if diff:
+            to_lines = lambda x: list(map(lambda l: l + "\n", x.split("\n")))
+
+            expected_lines = to_lines(expected)
+            actual_lines = to_lines(actual)
+
+            diff = difflib.unified_diff(
+                expected_lines,
+                actual_lines,
+                fromfile=expected_path,
+                tofile="generated output",
+            )
+            sys.stderr.writelines(diff)
+        return False
+    return True
 
 
 def runner(
@@ -199,6 +232,31 @@ def runner(
         print("Unknown inspector type: {}".format(inspector))
         sys.exit(-1)
 
+    if args.test:
+        # test mode
+        if len(args.bases) < 2:
+            print("Usage: <codemod> --test <input file> <file with expected output>")
+            sys.exit(-1)
+
+        input_file = args.bases[0]
+        output_file = args.bases[1]
+
+        if test_runner(inspector, input_file, output_file):
+            message = "Test successful, contents identical"
+            if sys.stdout.encoding == "utf-8":
+                print("✨ " + message)
+            else:
+                print(message)
+            sys.exit(0)
+        else:
+            message = "Contents differ"
+            if sys.stdout.encoding == "utf-8":
+                print("❌ " + message)
+            else:
+                print(message)
+            sys.exit(-1)
+
+    # production mode
     python_files: List[str] = []
     for base in args.bases:
         python_files += collect_files(base, ignored=args.ignore)

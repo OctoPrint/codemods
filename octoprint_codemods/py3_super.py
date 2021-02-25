@@ -18,6 +18,10 @@ class Py3Super(CodeMod):
         super().__init__(*args, **kwargs)
         self.classes = []
 
+    def reset(self, *args, **kwargs) -> None:
+        self.classes = []
+        return super().reset(*args, **kwargs)
+
     def visit_ClassDef(self, node: cst.ClassDef) -> cst.ClassDef:
         self.classes.append(node.name.value)
         return super().visit_ClassDef(node)

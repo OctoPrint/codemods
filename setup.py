@@ -5,9 +5,24 @@ from setuptools import find_packages, setup
 with io.open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
 
+codemods = [
+    "dict_to_literal",
+    "set_to_literal",
+    "not_in",
+    "remove_future_imports",
+    "remove_builtins_imports",
+    "detect_past_builtins_imports",
+    "py3_class_inheritance",
+    "oserror_merge",
+    "yield_from_generator",
+    "dict_comprehension_to_literal",
+    "string_encoding",
+    "py3_super",
+]
+
 setup(
     name="octoprint_codemods",
-    version="0.3.0",
+    version="0.4.0",
     description="libcst based tooling for running various conversions on OctoPrint's source",
     url="https://github.com/OctoPrint/codemods",
     packages=find_packages(exclude=["tests"]),
@@ -24,18 +39,8 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "codemod_dict_to_literal=octoprint_codemods.dict_to_literal:main",
-            "codemod_set_to_literal=octoprint_codemods.set_to_literal:main",
-            "codemod_not_in=octoprint_codemods.not_in:main",
-            "codemod_remove_future_imports=octoprint_codemods.remove_future_imports:main",
-            "codemod_remove_builtins_imports=octoprint_codemods.remove_builtins_imports:main",
-            "codemod_detect_past_builtins_imports=octoprint_codemods.detect_past_builtins_imports:main",
-            "codemod_py3_class_inheritance=octoprint_codemods.py3_class_inheritance:main",
-            "codemod_oserror_merge=octoprint_codemods.oserror_merge:main",
-            "codemod_yield_from_generator=octoprint_codemods.yield_from_generator:main",
-            "codemod_dict_comprehension_to_literal=octoprint_codemods.dict_comprehension_to_literal:main",
-            "codemod_string_encoding=octoprint_codemods.string_encoding:main",
-            "codemod_py3_super=octoprint_codemods.py3_super:main",
+            "codemod_{mod}=octoprint_codemods.{mod}:main".format(mod=mod)
+            for mod in codemods
         ]
     },
 )
