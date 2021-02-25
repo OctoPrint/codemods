@@ -34,7 +34,7 @@ jobs:
                   python-version: 3.7
             - name: 🏗 Set up dependencies
               run: |
-                  pip install -e .
+                  pip install -e . -r requirements.txt
             - name: 🚀 Run black
               run: |
                   pre-commit run --hook-stage manual black --all-files --show-diff-on-failure
@@ -50,7 +50,7 @@ jobs:
                   python-version: 3.7
             - name: 🏗 Set up dependencies
               run: |
-                  pip install -e .
+                  pip install -e . -r requirements.txt
             - name: 🚀 Run isort
               run: |
                   pre-commit run --hook-stage manual isort --all-files --show-diff-on-failure
@@ -66,7 +66,7 @@ jobs:
                   python-version: 3.7
             - name: 🏗 Set up dependencies
               run: |
-                  pip install -e .
+                  pip install -e . -r requirements.txt
             - name: 🚀 Run flake8
               run: |
                   pre-commit run --hook-stage manual flake8 --all-files
@@ -82,7 +82,7 @@ jobs:
                   python-version: 3.7
             - name: 🏗 Set up dependencies
               run: |
-                  pip install -e .
+                  pip install -e . -r requirements.txt
             - name: 🚀 Run prettier
               run: |
                   pre-commit run --hook-stage manual prettier --all-files --show-diff-on-failure
@@ -96,9 +96,9 @@ jobs:
               uses: actions/setup-python@v1
               with:
                   python-version: 3.7
-            - name: 🏗 Set up test dependencies
+            - name: 🏗 Set up dependencies
               run: |
-                  pip install -e .
+                  pip install -e . -r requirements.txt
             - name: 🚀 Run test suite
               run: |
                   pytest
