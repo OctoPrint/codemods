@@ -18,10 +18,10 @@ See
 
 This repository can be used with [pre-commit](https://pre-commit.com/).
 
-``` yaml
-  - repo: https://github.com/OctoPrint/codemods
-    rev: main
-    hooks:
+```yaml
+- repo: https://github.com/OctoPrint/codemods
+  rev: main
+  hooks:
       - id: codemod_dict_to_literal
       - id: codemod_set_to_literal
       - id: codemod_not_in

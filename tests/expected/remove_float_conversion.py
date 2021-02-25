@@ -11,3 +11,5 @@ factor = int(foo * 100)
 factor = int(foo * 100)
 
 foo *= 100
+
+foo /= 2

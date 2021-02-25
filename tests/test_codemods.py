@@ -1,7 +1,5 @@
-import io
+import importlib
 import os
-import subprocess
-import sys
 
 import pytest
 
@@ -28,33 +26,22 @@ def _get_files(codemod):
     return input_file, expected_file
 
 
-def _run_test(codemod, input_file, expected_file):
-    with subprocess.Popen(
-        r"{} -m octoprint_codemods.{} --test {} {}".format(
-            sys.executable, codemod, input_file, expected_file
-        ),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    ) as p:
-
-        p.stdout = io.TextIOWrapper(p.stdout, encoding="utf-8", errors="replace")
-        p.stderr = io.TextIOWrapper(p.stderr, encoding="utf-8", errors="replace")
-
-        output, errors = p.communicate()
-        returncode = p.returncode
-
-    return returncode, output, errors
+def _run_test(codemod, input_file, expected_file, monkeypatch):
+    monkeypatch.setattr(
+        "sys.argv", ["codemod_" + codemod, "--test", input_file, expected_file]
+    )
+    module = importlib.import_module("octoprint_codemods." + codemod)
+    getattr(module, "main")()
 
 
 @pytest.mark.parametrize(
     "codemod", [pytest.param(codemod, id=codemod) for codemod in codemods]
 )
-def test_codemods(codemod):
+def test_codemods(codemod, monkeypatch):
     input_file, expected_file = _get_files(codemod)
     if not os.path.exists(input_file) or not os.path.exists(expected_file):
         pytest.fail("Input file or expected file missing for {}".format(codemod))
 
-    returncode, output, errors = _run_test(codemod, input_file, expected_file)
-    if returncode != 0:
-        print(errors + output)
-        pytest.fail("Returncode not 0, test failed")
+    with pytest.raises(SystemExit) as exc:
+        _run_test(codemod, input_file, expected_file, monkeypatch)
+    assert exc.value.code == 0

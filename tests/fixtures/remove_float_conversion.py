@@ -11,3 +11,5 @@ factor = int(foo * 100.0)
 factor = int(foo * 100)
 
 foo *= 100.0
+
+foo /= 2.0

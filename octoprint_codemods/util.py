@@ -242,18 +242,10 @@ def runner(
         output_file = args.bases[1]
 
         if test_runner(inspector, input_file, output_file):
-            message = "Test successful, contents identical"
-            if sys.stdout.encoding == "utf-8":
-                print("✨ " + message)
-            else:
-                print(message)
+            print("✨ Test successful, contents identical")
             sys.exit(0)
         else:
-            message = "Contents differ"
-            if sys.stdout.encoding == "utf-8":
-                print("❌ " + message)
-            else:
-                print(message)
+            print("❌ Contents differ")
             sys.exit(-1)
 
     # production mode
