@@ -18,6 +18,7 @@ codemods = [
     "dict_comprehension_to_literal",
     "string_encoding",
     "py3_super",
+    "remove_float_conversion",
 ]
 
 

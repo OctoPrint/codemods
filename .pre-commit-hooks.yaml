@@ -94,3 +94,11 @@
   language_version: python3.7
   require_serial: false
   types: [python]
+- id: codemod_remove_float_conversion
+  name: remove_float_conversion
+  description: "Removes unnecessary float conversions."
+  entry: codemod_remove_float_conversion
+  language: python
+  language_version: python3.7
+  require_serial: false
+  types: [python]
