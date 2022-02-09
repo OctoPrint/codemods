@@ -1,15 +1,7 @@
-- id: codemod_dict_to_literal
-  name: dict_to_literal
-  description: "Converts dict(**args) to literal {...} constructs."
-  entry: codemod_dict_to_literal
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_set_to_literal
-  name: set_to_literal
-  description: "Converts set(*args) to literal {...} constructs."
-  entry: codemod_set_to_literal
+- id: codemod_batch
+  name: batch
+  description: "Batch runs codemods in a single command (and traversal)"
+  entry: codemod_batch
   language: python
   language_version: python3
   require_serial: false
@@ -22,18 +14,18 @@
   language_version: python3
   require_serial: false
   types: [python]
-- id: codemod_remove_future_imports
-  name: remove_future_imports
-  description: "Removes 'from __future__ imports ...' imports"
-  entry: codemod_remove_future_imports
+- id: codemod_remove_float_conversion
+  name: remove_float_conversion
+  description: "Removes unnecessary float conversions."
+  entry: codemod_remove_float_conversion
   language: python
   language_version: python3
   require_serial: false
   types: [python]
 - id: codemod_remove_builtins_imports
-  name: remove_builtins_imports
-  description: "Removes 'from builtins import ...' imports"
-  entry: codemod_remove_builtins_imports
+  name: remove_float_conversion
+  description: "Removes unnecessary float conversions."
+  entry: codemod_remove_float_conversion
   language: python
   language_version: python3
   require_serial: false
@@ -42,62 +34,6 @@
   name: detect_past_builtins_imports
   description: "Detects 'from past import ...', 'from past.builtins import ...', 'import past', 'import past.builtins' imports"
   entry: codemod_detect_past_builtins_imports
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_py3_class_inheritance
-  name: py3_class_inheritance
-  description: "Changes 'class Foo(object):' to 'class Foo:'."
-  entry: codemod_py3_class_inheritance
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_oserror_merge
-  name: oserror_merge
-  description: "Converts 'EnvironmentError' and friends to 'OSError'."
-  entry: codemod_oserror_merge
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_yield_from_generator
-  name: yield_from_generator
-  description: "Converts 'for x in generator: yield x' to 'yield from generator'."
-  entry: codemod_yield_from_generator
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_dict_comprehension_to_literal
-  name: dict_comprehension_to_literal
-  description: "Converts 'dict((x.a, x.b) for x in y)' to '{x.a: x.b for x in y}'"
-  entry: codemod_dict_comprehension_to_literal
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_string_encoding
-  name: string_encoding
-  description: "Converts r'abc'.encode('utf8') to rb'abc' and 'abc'.encode('utf8') to 'abc'.encode()"
-  entry: codemod_string_encoding
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_py3_super
-  name: py3_super
-  description: "Converts  'super(cls, self).member' to 'super().member'."
-  entry: codemod_py3_super
-  language: python
-  language_version: python3
-  require_serial: false
-  types: [python]
-- id: codemod_remove_float_conversion
-  name: remove_float_conversion
-  description: "Removes unnecessary float conversions."
-  entry: codemod_remove_float_conversion
   language: python
   language_version: python3
   require_serial: false

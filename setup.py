@@ -6,24 +6,16 @@ with io.open("README.md", "r", encoding="utf-8") as readme:
     long_description = readme.read()
 
 codemods = [
-    "dict_to_literal",
-    "set_to_literal",
+    "batch",
     "not_in",
-    "remove_future_imports",
     "remove_builtins_imports",
-    "detect_past_builtins_imports",
-    "py3_class_inheritance",
-    "oserror_merge",
-    "yield_from_generator",
-    "dict_comprehension_to_literal",
-    "string_encoding",
-    "py3_super",
     "remove_float_conversion",
+    "detect_past_builtins_imports",
 ]
 
 setup(
     name="octoprint_codemods",
-    version="0.4.0",
+    version="0.5.0",
     description="libcst based tooling for running various conversions on OctoPrint's source",
     url="https://github.com/OctoPrint/codemods",
     packages=find_packages(exclude=["tests"]),

@@ -14,6 +14,7 @@ __license__ = "MIT"
 
 
 class CheckBuiltinsImports(CodeMod):
+    COMMAND: str = "remove_builtins_imports"
     DESCRIPTION: str = "Removes 'from builtins import ...' and 'import builtins'"
 
     def leave_Import(

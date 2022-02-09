@@ -2,7 +2,7 @@
 
 Helpful codemods based on [LibCST](https://github.com/Instagram/LibCST/) created for use in OctoPrint development.
 
-Provided as-is for documentationational purposes.
+Provided as-is for documentational purposes.
 
 ## Setup
 
@@ -50,16 +50,23 @@ tests/input/not_in.py:4:0:
 ✨ Test successful, contents identical
 ```
 
+For running multiple codemods on the same inputs, it is recommended to use `codemod_batch`:
+
+```
+$ codemod_batch --check not_in --check remove_float_conversion tests/input/file.py
+tests/input/not_in.py:4:0:
+  not foo in bar
+tests/input/not_in.py: 1 replacements done
+```
+
 ## pre-commit
 
 This repository can be used with [pre-commit](https://pre-commit.com/).
 
 ```yaml
 - repo: https://github.com/OctoPrint/codemods
-  rev: main
+  rev: "0.5.0"
   hooks:
-      - id: codemod_dict_to_literal
-      - id: codemod_set_to_literal
       - id: codemod_not_in
 ```
 
@@ -67,45 +74,40 @@ Additional arguments can also be specified:
 
 ```yaml
 - repo: https://github.com/OctoPrint/codemods
-  rev: main
+  rev: "0.5.0"
   hooks:
-      - id: codemod_dict_to_literal
+      - id: codemod_not_in
         args: ["--ignore", "lib/vendor"]
-      - id: remove_future_imports
-        args: ["--allow", "division", "--allow", "unicode_literals"]
+```
+
+If more than one command should be run, use the `batch` command for better performance:
+
+```yaml
+- repo: https://github.com/OctoPrint/codemods
+  rev: "0.5.0"
+  hooks:
+      - id: codemod_batch
+        args:
+            [
+                "--ignore",
+                "lib/vendor",
+                "--check",
+                "not_in",
+                "--check",
+                "remove_float_conversion",
+            ]
 ```
 
 ## What codemods are available?
 
-### `dict_comprehension_to_literal`
-
-Converts `dict((x.a, x.b) for x in y)` to `{x.a: x.b for x in y}`.
-
-### `dict_to_literal`
-
-Converts `dict(**args)` to literal `{...}` constructs.
+> 🛑
+>
+> Mods overlapping with [pyupgrade](https://github.com/asottile/pyupgrade) have been
+> removed in version 0.5.0.
 
 ### `not_in`
 
 Converts `not foo in bar` to `foo not in bar` constructs.
-
-### `oserror_merge`
-
-Converts `EnvironmentError` and friends to `OSError`.
-
-Use with Python 3 source only.
-
-### `py3_class_inheritance`
-
-Converts `class Foo(object):` to `class Foo:`.
-
-Use with Python 3 source only.
-
-### `py3_super`
-
-Converts `super(cls, self).member` to `super().member`.
-
-Use with Python 3 source only.
 
 ### `remove_builtins_imports`
 
@@ -118,30 +120,6 @@ Use with Python 3 source only.
 Removes unnecessary float conversions and `.0`s in division and multiplication.
 
 Use with Python 3 source only, unless `from __future__ import division` is used.
-
-### `remove_future_imports`
-
-Removes `from __future__ import ...`.
-
-Allowed imports can be specified with `--allow`.
-
-Use with Python 3 source only.
-
-### `set_to_literal`
-
-Converts `set(*args)` to literal `{...}` constructs.
-
-### `string_encoding`
-
-Converts `r"abc".encode("utf-8")` to `rb"abc"` and `"abc".encode("utf-8")` to `"abc".encode()`.
-
-Use with Python 3 source only, unless `from __future__ import unicode_literals` is used.
-
-### `yield_from_generator`
-
-Converts `for x in generator: yield x` to `yield from generator`.
-
-Use with Python 3 source only.
 
 ## What code checks are available?
 

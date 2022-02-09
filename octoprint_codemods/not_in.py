@@ -14,6 +14,7 @@ __license__ = "MIT"
 
 
 class NotIn(CodeMod):
+    COMMAND: str = "not_in"
     DESCRIPTION: str = "Converts 'not foo in bar' to 'foo not in bar' constructs."
 
     def leave_UnaryOperation(

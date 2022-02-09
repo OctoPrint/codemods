@@ -14,6 +14,7 @@ __license__ = "MIT"
 
 
 class RemoveFloatConversion(CodeMod):
+    COMMAND: str = "remove_float_conversion"
     DESCRIPTION: str = "Removes unnecessary float conversions"
 
     TARGET_OPERATOR = m.OneOf(
@@ -41,6 +42,8 @@ class RemoveFloatConversion(CodeMod):
     def leave_BinaryOperation(
         self, original_node: cst.BinaryOperation, updated_node: cst.BinaryOperation
     ) -> cst.BinaryOperation:
+        changed = False
+
         if m.matches(
             updated_node,
             m.BinaryOperation(operator=self.TARGET_OPERATOR, left=self.TARGET_ARGUMENT),
@@ -49,6 +52,7 @@ class RemoveFloatConversion(CodeMod):
             updated_node = updated_node.with_changes(
                 left=self._replace_arg(updated_node.left)
             )
+            changed = True
 
         if m.matches(
             updated_node,
@@ -58,6 +62,11 @@ class RemoveFloatConversion(CodeMod):
             updated_node = updated_node.with_changes(
                 right=self._replace_arg(updated_node.right)
             )
+            changed = True
+
+        if changed:
+            self._report_node(original_node)
+            self.count += 1
 
         return updated_node
 
@@ -68,6 +77,8 @@ class RemoveFloatConversion(CodeMod):
             updated_node,
             m.AugAssign(operator=self.TARGET_OPERATOR, value=self.TARGET_ARGUMENT),
         ):
+            self._report_node(original_node)
+            self.count += 1
             return updated_node.with_changes(value=self._replace_arg(updated_node.value))
 
         return updated_node

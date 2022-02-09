@@ -3,15 +3,107 @@ import difflib
 import os
 import re
 import sys
-from typing import Callable, ClassVar, List, Tuple, Type, Union, cast
+from abc import ABCMeta
+from contextlib import ExitStack
+from typing import Callable, ClassVar, Iterable, List, Optional, Tuple, Type, Union, cast
 
 import libcst as cst
-from libcst import MetadataDependent
+from libcst._batched_visitor import _get_visitor_methods, _VisitorMethodCollection
 from libcst.metadata import PositionProvider
 
 
-class CodeInspector(MetadataDependent):
+class BatchedCSTTranformer(cst.CSTTransformer):
+    """
+    Internal visitor class to perform batched traversal over a tree.
+    """
+
+    visitor_methods: _VisitorMethodCollection
+
+    def __init__(
+        self,
+        visitor_methods: _VisitorMethodCollection,
+    ) -> None:
+        super().__init__()
+        self.visitor_methods = visitor_methods
+
+    def on_visit(self, node: cst.CSTNode) -> bool:
+        """
+        Call appropriate visit methods on node before visiting children.
+        """
+        type_name = type(node).__name__
+
+        for v in self.visitor_methods.get(f"visit_{type_name}", []):
+            v(node)
+
+        return True
+
+    def on_leave(
+        self, original_node: cst.CSTNode, updated_node: cst.CSTNode
+    ) -> Union[cst.CSTNodeT, cst.RemovalSentinel]:
+        """
+        Call appropriate leave methods on node after visiting children.
+        """
+        type_name = type(original_node).__name__
+
+        for v in self.visitor_methods.get(f"leave_{type_name}", []):
+            updated_node = v(original_node, updated_node)
+
+        return updated_node
+
+    def on_visit_attribute(self, node: "cst.CSTNode", attribute: str) -> None:
+        """
+        Call appropriate visit attribute methods on node before visiting
+        attribute's children.
+        """
+        type_name = type(node).__name__
+
+        for v in self.visitor_methods.get(f"visit_{type_name}_{attribute}", []):
+            v(node)
+
+    def on_leave_attribute(self, original_node: "cst.CSTNode", attribute: str) -> None:
+        """
+        Call appropriate leave attribute methods on node after visiting
+        attribute's children.
+        """
+        type_name = type(original_node).__name__
+
+        for v in self.visitor_methods.get(f"leave_{type_name}_{attribute}", []):
+            v(original_node)
+
+
+def transform_batched(
+    node: cst.CSTNodeT,
+    batchable_transformers: Iterable[
+        Union[cst.BatchableCSTVisitor, BatchedCSTTranformer]
+    ],
+) -> cst.CSTNodeT:
+    transformer_methods = _get_visitor_methods(batchable_transformers)
+    batched_transformer = BatchedCSTTranformer(transformer_methods)
+    return cast(cst.CSTNodeT, node.visit(batched_transformer))
+
+
+class CodeInspectorMeta(ABCMeta):
+    registry = {}
+
+    def __new__(cls, name: str, bases: Tuple[Type, ...], attrs: dict) -> Type:
+        new_cls = super().__new__(cls, name, bases, attrs)
+        command = attrs.get("COMMAND")
+        if command:
+            CodeInspectorMeta.registry[command] = new_cls
+        return new_cls
+
+    @classmethod
+    def lookup(cls, command: str) -> Type:
+        return cls.registry.get(command)
+
+    @classmethod
+    def all(cls) -> List[str]:
+        return list(cls.registry.keys())
+
+
+class CodeInspector(cst.MetadataDependent, metaclass=CodeInspectorMeta):
     METADATA_DEPENDENCIES = (PositionProvider,)
+    COMMAND: ClassVar[str]
     DESCRIPTION: ClassVar[str]
 
     args: argparse.Namespace
@@ -61,11 +153,11 @@ class CodeInspector(MetadataDependent):
             )
 
 
-class CodeMod(CodeInspector, cst.CSTTransformer):
+class CodeMod(CodeInspector, cst.CSTTransformer, cst.BatchableCSTVisitor):
     pass
 
 
-class CodeCheck(CodeInspector, cst.CSTVisitor):
+class CodeCheck(CodeInspector, cst.CSTVisitor, cst.BatchableCSTVisitor):
     pass
 
 
@@ -74,7 +166,7 @@ class TransformError(Exception):
 
 
 def process_file(
-    visitor: Union[CodeMod, CodeCheck],
+    visitors: Iterable[Union[CodeMod, CodeCheck]],
     filename: str,
     write_before: bool = False,
     write_after: bool = False,
@@ -97,15 +189,25 @@ def process_file(
         with open(filename + ".cst.before", "w") as cst_file:
             cst_file.write(str(source_tree))
 
-    visitor.reset(filename=filename, module=module)
+    mod = False
+    for v in visitors:
+        v.reset(filename=filename, module=module)
+        mod = mod or isinstance(v, CodeMod)
+
     try:
-        visited_tree = source_tree.visit(visitor)
+        with ExitStack() as stack:
+            # Resolve dependencies of visitors
+            for v in visitors:
+                stack.enter_context(v.resolve(source_tree))
+
+            visited_tree = transform_batched(source_tree.module, visitors)
+
     except TransformError as e:
         print("{} failed transform: {}".format(filename, str(e)))
         return
 
-    if isinstance(visitor, CodeMod):
-        if visitor.count:
+    if mod:
+        if v.count:
             if write_result:
                 with open(filename, "w") as python_file:
                     python_file.write(visited_tree.code)
@@ -134,7 +236,7 @@ def collect_files(base: str, ignored: List[str]) -> Tuple[str, ...]:
 
     if os.path.isdir(base):
         python_files: List[str] = []
-        for root, dirs, filenames in os.walk(base):
+        for root, _, filenames in os.walk(base):
             full_filenames = (f"{root}/{filename}" for filename in filenames)
             python_files += [
                 full_filename
@@ -147,7 +249,9 @@ def collect_files(base: str, ignored: List[str]) -> Tuple[str, ...]:
     return tuple()
 
 
-def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespace:
+def parse_args(
+    description: str, add_parser_args: Optional[Callable] = None
+) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "bases",
@@ -187,16 +291,21 @@ def parse_args(description: str, add_parser_args: Callable) -> argparse.Namespac
         action="store_true",
         help="Run in test mode: first path is input file, second path is file with expected output.",
     )
-    add_parser_args(parser)
+    if add_parser_args:
+        add_parser_args(parser)
     return parser.parse_args()
 
 
 def test_runner(
-    mod: CodeMod, input_path: str, expected_path: str, diff: bool = True
+    mods: Iterable[CodeMod], input_path: str, expected_path: str, diff: bool = True
 ) -> bool:
     with open(expected_path, "r") as python_file:
         expected = python_file.read()
-    actual = process_file(mod, input_path, write_result=False)
+    actual = process_file(
+        mods,
+        input_path,
+        write_result=False,
+    )
 
     if actual != expected:
         if diff:
@@ -216,6 +325,102 @@ def test_runner(
     return True
 
 
+def run(
+    inspectors: Iterable[Union[CodeMod, CodeCheck]], args: argparse.Namespace, output: str
+) -> int:
+    if args.test:
+        # test mode
+        if len(args.bases) < 2:
+            print("Usage: <codemod> --test <input file> <file with expected output>")
+            sys.exit(-1)
+
+        input_file = args.bases[0]
+        output_file = args.bases[1]
+
+        if test_runner(inspectors, input_file, output_file):
+            print("✨ Test successful, contents identical")
+            sys.exit(0)
+        else:
+            print("❌ Contents differ")
+            sys.exit(-1)
+
+    # production mode
+    python_files: List[str] = []
+    for base in args.bases:
+        python_files += collect_files(base, ignored=args.ignore)
+
+    count = 0
+    for python_file in python_files:
+        process_file(
+            inspectors,
+            python_file,
+            write_before=args.before,
+            write_after=args.after,
+            write_result=not args.dryrun,
+        )
+
+        file_count = sum([inspector.count for inspector in inspectors])
+        if output and (args.verbose or file_count):
+            print(output.format(file=python_file.replace("\\", "/"), count=file_count))
+        count += file_count
+
+    sys.exit(count)
+
+
+def _load_all():
+    import importlib
+    import pkgutil
+
+    path = os.path.dirname(__file__)
+    for _, module_name, _ in pkgutil.walk_packages(
+        [
+            path,
+        ]
+    ):
+        importlib.import_module(f"octoprint_codemods.{module_name}")
+
+
+def batch_runner(
+    output: Union[str, None] = "{file}: {count} replacements done",
+) -> None:
+    _load_all()
+
+    def batch_args(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument(
+            "--check",
+            "--mod",
+            type=str,
+            default=[],
+            action="append",
+            help="Names of checks/mods to run",
+        )
+
+    args = parse_args("multi_runner", add_parser_args=batch_args)
+
+    classes = []
+    for name in args.check:
+        cls = CodeInspectorMeta.lookup(name)
+        if cls:
+            classes.append(cls)
+        else:
+            print(f"No check or mod found for {name}, skipping")
+
+    inspectors = []
+    for cls in classes:
+        inspector = cls(args)
+
+        if isinstance(inspector, CodeMod):
+            inspector = cast(CodeMod, inspector)
+        elif isinstance(inspector, CodeCheck):
+            inspector = cast(CodeCheck, inspector)
+        else:
+            continue
+
+        inspectors.append(inspector)
+
+    run(inspectors, args, output)
+
+
 def runner(
     cls: Type[CodeInspector],
     output: Union[str, None] = "{file}: {count} replacements done",
@@ -232,40 +437,10 @@ def runner(
         print("Unknown inspector type: {}".format(inspector))
         sys.exit(-1)
 
-    if args.test:
-        # test mode
-        if len(args.bases) < 2:
-            print("Usage: <codemod> --test <input file> <file with expected output>")
-            sys.exit(-1)
-
-        input_file = args.bases[0]
-        output_file = args.bases[1]
-
-        if test_runner(inspector, input_file, output_file):
-            print("✨ Test successful, contents identical")
-            sys.exit(0)
-        else:
-            print("❌ Contents differ")
-            sys.exit(-1)
-
-    # production mode
-    python_files: List[str] = []
-    for base in args.bases:
-        python_files += collect_files(base, ignored=args.ignore)
-
-    count = 0
-    for python_file in python_files:
-        process_file(
+    run(
+        [
             inspector,
-            python_file,
-            write_before=args.before,
-            write_after=args.after,
-            write_result=not args.dryrun,
-        )
-        if output and (args.verbose or inspector.count):
-            print(
-                output.format(file=python_file.replace("\\", "/"), count=inspector.count)
-            )
-        count += inspector.count
-
-    sys.exit(count)
+        ],
+        args,
+        output,
+    )
