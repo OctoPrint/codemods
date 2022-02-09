@@ -18,13 +18,16 @@ class BatchedCSTTranformer(cst.CSTTransformer):
     """
 
     visitor_methods: _VisitorMethodCollection
+    transformer_methods: _VisitorMethodCollection
 
     def __init__(
         self,
         visitor_methods: _VisitorMethodCollection,
+        transformer_methods: _VisitorMethodCollection,
     ) -> None:
         super().__init__()
         self.visitor_methods = visitor_methods
+        self.transformer_methods = transformer_methods
 
     def on_visit(self, node: cst.CSTNode) -> bool:
         """
@@ -32,7 +35,11 @@ class BatchedCSTTranformer(cst.CSTTransformer):
         """
         type_name = type(node).__name__
 
-        for v in self.visitor_methods.get(f"visit_{type_name}", []):
+        method_name = f"visit_{type_name}"
+        methods = self.visitor_methods.get(
+            method_name, []
+        ) + self.transformer_methods.get(method_name, [])
+        for v in methods:
             v(node)
 
         return True
@@ -45,7 +52,10 @@ class BatchedCSTTranformer(cst.CSTTransformer):
         """
         type_name = type(original_node).__name__
 
-        for v in self.visitor_methods.get(f"leave_{type_name}", []):
+        method_name = f"leave_{type_name}"
+        for v in self.visitor_methods.get(method_name, []):
+            v(updated_node)
+        for v in self.transformer_methods.get(method_name, []):
             updated_node = v(original_node, updated_node)
 
         return updated_node
@@ -57,7 +67,11 @@ class BatchedCSTTranformer(cst.CSTTransformer):
         """
         type_name = type(node).__name__
 
-        for v in self.visitor_methods.get(f"visit_{type_name}_{attribute}", []):
+        method_name = f"visit_{type_name}_{attribute}"
+        methods = self.visitor_methods.get(
+            method_name, []
+        ) + self.transformer_methods.get(method_name, [])
+        for v in methods:
             v(node)
 
     def on_leave_attribute(self, original_node: "cst.CSTNode", attribute: str) -> None:
@@ -67,18 +81,25 @@ class BatchedCSTTranformer(cst.CSTTransformer):
         """
         type_name = type(original_node).__name__
 
-        for v in self.visitor_methods.get(f"leave_{type_name}_{attribute}", []):
+        method_name = f"leave_{type_name}_{attribute}"
+        methods = self.visitor_methods.get(
+            method_name, []
+        ) + self.transformer_methods.get(method_name, [])
+        for v in methods:
             v(original_node)
 
 
 def transform_batched(
     node: cst.CSTNodeT,
-    batchable_transformers: Iterable[
-        Union[cst.BatchableCSTVisitor, BatchedCSTTranformer]
-    ],
+    visitors: Iterable[Union[cst.CSTVisitor, cst.CSTTransformer]],
 ) -> cst.CSTNodeT:
-    transformer_methods = _get_visitor_methods(batchable_transformers)
-    batched_transformer = BatchedCSTTranformer(transformer_methods)
+    visitors = [t for t in visitors if isinstance(t, cst.CSTVisitor)]
+    transformers = [t for t in visitors if isinstance(t, cst.CSTTransformer)]
+
+    visitor_methods = _get_visitor_methods(visitors)
+    transformer_methods = _get_visitor_methods(transformers)
+
+    batched_transformer = BatchedCSTTranformer(visitor_methods, transformer_methods)
     return cast(cst.CSTNodeT, node.visit(batched_transformer))
 
 

@@ -12,6 +12,7 @@ __license__ = "MIT"
 
 
 class CheckPastBuiltinsImports(CodeCheck):
+    COMMAND: str = "detect_past_builtins_imports"
     DESCRIPTION: str = "Detects 'from past... import ...', 'import past...'"
 
     def leave_Import(self, node: cst.Import) -> None:
