@@ -1,5 +1,5 @@
 - id: codemod_batch
-  name: batch
+  name: "OctoPrint codemod: batch"
   description: "Batch runs codemods in a single command (and traversal)"
   entry: codemod_batch
   language: python
@@ -7,7 +7,7 @@
   require_serial: false
   types: [python]
 - id: codemod_not_in
-  name: not_in
+  name: "OctoPrint codemod: not_in"
   description: "Converts 'not foo in bar' to 'foo not in bar' constructs."
   entry: codemod_not_in
   language: python
@@ -15,7 +15,7 @@
   require_serial: false
   types: [python]
 - id: codemod_remove_float_conversion
-  name: remove_float_conversion
+  name: "OctoPrint codemod: remove_float_conversion"
   description: "Removes unnecessary float conversions."
   entry: codemod_remove_float_conversion
   language: python
@@ -23,15 +23,15 @@
   require_serial: false
   types: [python]
 - id: codemod_remove_builtins_imports
-  name: remove_float_conversion
-  description: "Removes unnecessary float conversions."
-  entry: codemod_remove_float_conversion
+  name: "OctoPrint codemod: remove_builtins_imports"
+  description: "Removes 'from builtins import ...' and 'import builtins'."
+  entry: codemod_remove_builtins_imports
   language: python
   language_version: python3
   require_serial: false
   types: [python]
 - id: codemod_detect_past_builtins_imports
-  name: detect_past_builtins_imports
+  name: "OctoPrint codemod: detect_past_builtins_imports"
   description: "Detects 'from past import ...', 'from past.builtins import ...', 'import past', 'import past.builtins' imports"
   entry: codemod_detect_past_builtins_imports
   language: python

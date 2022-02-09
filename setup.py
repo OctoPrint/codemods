@@ -15,7 +15,7 @@ codemods = [
 
 setup(
     name="octoprint_codemods",
-    version="0.6.1",
+    version="0.6.2",
     description="libcst based tooling for running various conversions on OctoPrint's source",
     url="https://github.com/OctoPrint/codemods",
     packages=find_packages(exclude=["tests"]),
