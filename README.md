@@ -65,7 +65,7 @@ This repository can be used with [pre-commit](https://pre-commit.com/).
 
 ```yaml
 - repo: https://github.com/OctoPrint/codemods
-  rev: "0.6.3"
+  rev: "0.6.2"
   hooks:
       - id: codemod_not_in
 ```
@@ -74,7 +74,7 @@ Additional arguments can also be specified:
 
 ```yaml
 - repo: https://github.com/OctoPrint/codemods
-  rev: "0.6.3"
+  rev: "0.6.2"
   hooks:
       - id: codemod_not_in
         args: ["--ignore", "lib/vendor"]
@@ -84,7 +84,7 @@ If more than one command should be run, use the `batch` command for better perfo
 
 ```yaml
 - repo: https://github.com/OctoPrint/codemods
-  rev: "0.6.3"
+  rev: "0.6.2"
   hooks:
       - id: codemod_batch
         args:
