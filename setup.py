@@ -19,7 +19,7 @@ setup(
     description="libcst based tooling for running various conversions on OctoPrint's source",
     url="https://github.com/OctoPrint/codemods",
     packages=find_packages(exclude=["tests"]),
-    install_requires=["libcst"],
+    install_requires=["libcst==0.3.23"],
     author="Gina Häußge",
     author_email="gina@octoprint.org",
     license="MIT License",
