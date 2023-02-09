@@ -94,7 +94,7 @@ If more than one command should be run, use the `batch` command for better perfo
                 "--check",
                 "not_in",
                 "--check",
-                "remove_float_conversion",
+                "remove_float_conversion"
             ]
 ```
 

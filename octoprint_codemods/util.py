@@ -333,7 +333,7 @@ def test_runner(
 
     if actual != expected:
         if diff:
-            to_lines = lambda x: list(map(lambda l: l + "\n", x.split("\n")))
+            to_lines = lambda x: list(map(lambda x: x + "\n", x.split("\n")))
 
             expected_lines = to_lines(expected)
             actual_lines = to_lines(actual)
